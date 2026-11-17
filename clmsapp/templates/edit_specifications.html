@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Specification — Computer Lab Management System{% endblock %}
+
+{% block heading %}EDIT SPECIFICATION{% endblock %}
+
+{% block content %}
+                <form method="post">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-header"><div class="card-title">Edit Specification</div></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label for="computer">Computer</label>
+                            <select class="form-select" id="computer" name="computer" required>
+                                {% for computer in computers %}
+                                <option value="{{ computer.id }}" {% if computer.id == spec.computer_id %}selected{% endif %}>{{ computer.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="processor">Processor</label>
+                            <input type="text" class="form-control" id="processor" name="processor" value="{{ spec.processor }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="ram">RAM (GB)</label>
+                            <input type="number" class="form-control" id="ram" name="ram" value="{{ spec.ram }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="storage">Storage (GB)</label>
+                            <input type="number" class="form-control" id="storage" name="storage" value="{{ spec.storage }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="operating_system">Operating System</label>
+                            <input type="text" class="form-control" id="operating_system" name="operating_system" value="{{ spec.operating_system }}" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <button type="submit" class="btn btn-success">Update Specification</button>
+                    <a href="{% url 'specifications' %}" class="btn btn-danger">Cancel</a>
+                </div>
+            </div>
+        </form>
+{% endblock %}

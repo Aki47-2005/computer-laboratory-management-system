@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block title %}Disposals — Computer Lab Management System{% endblock %}
+
+{% block heading %}DISPOSALS{% endblock %}
+
+{% block content %}
+    {% if user.is_staff or user.is_superuser %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-header"><div class="card-title">Add New Disposal</div></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label for="computer">Computer</label>
+                            <select class="form-select" id="computer" name="computer" required>
+                                <option value="">Select Computer</option>
+                                {% for computer in computers %}
+                                <option value="{{ computer.id }}">{{ computer.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="date">Date</label>
+                            <input type="date" class="form-control" id="date" name="date" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="reason">Reason</label>
+                            <select class="form-select" id="reason" name="reason" required>
+                                <option value="">Select Reason</option>
+                                <option value="Obsolete">Obsolete</option>
+                                <option value="Beyond repair">Beyond repair</option>
+                                <option value="Damaged">Damaged</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="method">Method</label>
+                            <select class="form-select" id="method" name="method" required>
+                                <option value="">Select Method</option>
+                                <option value="Recycled">Recycled</option>
+                                <option value="Sold">Sold</option>
+                                <option value="Donated">Donated</option>
+                                <option value="Scrapped">Scrapped</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <button type="submit" class="btn btn-success">Add New Disposal</button>
+                    <button type="reset" class="btn btn-danger">Clear</button>
+                </div>
+            </div>
+        </form>
+    {% else %}
+        <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+            <i class="fas fa-info-circle me-3 fs-4"></i>
+            <div>
+                <strong>View-Only Mode:</strong> You are viewing computer disposal records. Adding, editing, and deleting are restricted to administrators.
+            </div>
+        </div>
+    {% endif %}
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-title">Registered Disposals</div>
+                {% if not user.is_staff and not user.is_superuser %}
+                <span class="badge badge-info"><i class="fas fa-eye me-1"></i> Read-Only</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-head-bg-primary">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Computer</th>
+                                <th>Date</th>
+                                <th>Reason</th>
+                                <th>Method</th>
+                                {% if user.is_staff or user.is_superuser %}<th>Action</th>{% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for disposal in disposals %}
+                            <tr>
+                                <td>{{ disposal.id }}</td>
+                                <td><strong>{{ disposal.computer.name }}</strong></td>
+                                <td>{{ disposal.date|date:"Y-m-d" }}</td>
+                                <td>{{ disposal.reason }}</td>
+                                <td>{{ disposal.method }}</td>
+                                {% if user.is_staff or user.is_superuser %}
+                                <td>
+                                    <a href="{% url 'edit_disposal' disposal.id %}" class="icon-btn icon-edit" data-bs-toggle="modal" data-bs-target="#editDisposal{{ disposal.id }}" title="Edit disposal" aria-label="Edit disposal"></a>
+                                    <form method="post" action="{% url 'delete_disposal' disposal.id %}" class="d-inline" onsubmit="return confirm('Delete this disposal?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="icon-btn icon-delete" title="Delete disposal" aria-label="Delete disposal"></button>
+                                    </form>
+                                </td>
+                                {% endif %}
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="{% if user.is_staff or user.is_superuser %}6{% else %}5{% endif %}" class="text-center text-muted">No disposals registered yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+{% if user.is_staff or user.is_superuser %}
+<!-- Edit pop-ups -->
+{% for disposal in disposals %}
+<div class="modal fade" id="editDisposal{{ disposal.id }}" tabindex="-1" aria-labelledby="editDisposalLabel{{ disposal.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <form method="post" action="{% url 'edit_disposal' disposal.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editDisposalLabel{{ disposal.id }}">Edit Disposal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label for="computer{{ disposal.id }}">Computer</label>
+                        <select class="form-select" id="computer{{ disposal.id }}" name="computer" required>
+                            {% for computer in computers %}
+                            <option value="{{ computer.id }}" {% if computer.id == disposal.computer_id %}selected{% endif %}>{{ computer.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label for="date{{ disposal.id }}">Date</label>
+                        <input type="date" class="form-control" id="date{{ disposal.id }}" name="date" value="{{ disposal.date|date:'Y-m-d' }}" required>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label for="reason{{ disposal.id }}">Reason</label>
+                        <select class="form-select" id="reason{{ disposal.id }}" name="reason" required>
+                            <option value="Obsolete" {% if disposal.reason == 'Obsolete' %}selected{% endif %}>Obsolete</option>
+                            <option value="Beyond repair" {% if disposal.reason == 'Beyond repair' %}selected{% endif %}>Beyond repair</option>
+                            <option value="Damaged" {% if disposal.reason == 'Damaged' %}selected{% endif %}>Damaged</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label for="method{{ disposal.id }}">Method</label>
+                        <select class="form-select" id="method{{ disposal.id }}" name="method" required>
+                            <option value="Recycled" {% if disposal.method == 'Recycled' %}selected{% endif %}>Recycled</option>
+                            <option value="Sold" {% if disposal.method == 'Sold' %}selected{% endif %}>Sold</option>
+                            <option value="Donated" {% if disposal.method == 'Donated' %}selected{% endif %}>Donated</option>
+                            <option value="Scrapped" {% if disposal.method == 'Scrapped' %}selected{% endif %}>Scrapped</option>
+                        </select>
+                    </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Update Disposal</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Maintenance — Computer Lab Management System{% endblock %}
+
+{% block heading %}EDIT MAINTENANCE RECORD{% endblock %}
+
+{% block content %}
+               <form method="post">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-header"><div class="card-title">Edit Maintenance Record</div></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label for="computer">Computer</label>
+                            <select class="form-select" id="computer" name="computer" required>
+                                {% for computer in computers %}
+                                <option value="{{ computer.id }}" {% if computer.id == record.computer_id %}selected{% endif %}>{{ computer.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="item">Item / Fault</label>
+                            <input type="text" class="form-control" id="item" name="item" value="{{ record.item }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="quantity">Quantity</label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" value="{{ record.quantity }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="date">Date</label>
+                            <input type="date" class="form-control" id="date" name="date" value="{{ record.date|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="cost">Task Cost (UGX)</label>
+                            <input type="number" class="form-control" id="cost" name="cost" value="{{ record.cost }}" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <button type="submit" class="btn btn-success">Update Record</button>
+                    <a href="{% url 'maintenance' %}" class="btn btn-danger">Cancel</a>
+                </div>
+            </div>
+        </form>
+{% endblock %}

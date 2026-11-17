@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Schedule — Computer Lab Management System{% endblock %}
+
+{% block heading %}EDIT SCHEDULE{% endblock %}
+
+{% block content %}
+               <form method="post">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-header"><div class="card-title">Edit Schedule</div></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label for="lab">Lab</label>
+                            <select class="form-select" id="lab" name="lab" required>
+                                {% for lab in labs %}
+                                <option value="{{ lab.id }}" {% if lab.id == schedule.lab_id %}selected{% endif %}>{{ lab.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="day">Day</label>
+                            <select class="form-select" id="day" name="day" required>
+                                <option value="MON" {% if schedule.day == 'MON' %}selected{% endif %}>MON</option>
+                                <option value="TUE" {% if schedule.day == 'TUE' %}selected{% endif %}>TUE</option>
+                                <option value="WED" {% if schedule.day == 'WED' %}selected{% endif %}>WED</option>
+                                <option value="THUR" {% if schedule.day == 'THUR' %}selected{% endif %}>THUR</option>
+                                <option value="FRI" {% if schedule.day == 'FRI' %}selected{% endif %}>FRI</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="start_time">Start Time</label>
+                            <input type="time" class="form-control" id="start_time" name="start_time" value="{{ schedule.start_time|time:'H:i' }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="end_time">End Time</label>
+                            <input type="time" class="form-control" id="end_time" name="end_time" value="{{ schedule.end_time|time:'H:i' }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="instructor">Instructor</label>
+                            <select class="form-select" id="instructor" name="instructor" required>
+                                {% for instructor in instructors %}
+                                <option value="{{ instructor.id }}" {% if instructor.id == schedule.instructor_id %}selected{% endif %}>{{ instructor.full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <button type="submit" class="btn btn-success">Update Schedule</button>
+                    <a href="{% url 'schedules' %}" class="btn btn-danger">Cancel</a>
+                </div>
+            </div>
+        </form>
+{% endblock %}

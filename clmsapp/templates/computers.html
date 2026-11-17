@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}Computers — Computer Lab Management System{% endblock %}
+
+{% block heading %}COMPUTERS{% endblock %}
+
+{% block content %}
+    {% if user.is_staff or user.is_superuser %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-header"><div class="card-title">Add New Computer</div></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label for="name">Computer Name</label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="e.g. PC-006" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="brand">Brand</label>
+                            <input type="text" class="form-control" id="brand" name="brand" placeholder="Brand" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="type">Type</label>
+                            <select class="form-select" id="type" name="type" required>
+                                <option value="">Select Type</option>
+                                <option value="Desktop">Desktop</option>
+                                <option value="Laptop">Laptop</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="colour">Colour</label>
+                            <input type="text" class="form-control" id="colour" name="colour" placeholder="Colour" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="lab">Lab</label>
+                            <select class="form-select" id="lab" name="lab" required>
+                                <option value="">Select Lab</option>
+                                {% for lab in labs %}
+                                <option value="{{ lab.id }}">{{ lab.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="status">Status</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="Active">Active</option>
+                                <option value="Maintenance">Maintenance</option>
+                                <option value="Disposed">Disposed</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <button type="submit" class="btn btn-success">Add New Computer</button>
+                    <button type="reset" class="btn btn-danger">Clear</button>
+                </div>
+            </div>
+        </form>
+    {% else %}
+        <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+            <i class="fas fa-info-circle me-3 fs-4"></i>
+            <div>
+                <strong>View-Only Mode:</strong> You are viewing registered computers across all labs. Adding, editing, and deleting are restricted to administrators.
+            </div>
+        </div>
+    {% endif %}
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-title">Registered Computers</div>
+                {% if not user.is_staff and not user.is_superuser %}
+                <span class="badge badge-info"><i class="fas fa-eye me-1"></i> Read-Only</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-head-bg-primary">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Brand</th>
+                                <th>Type</th>
+                                <th>Colour</th>
+                                <th>Lab</th>
+                                <th>Status</th>
+                                {% if user.is_staff or user.is_superuser %}<th>Action</th>{% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for computer in computers %}
+                            <tr>
+                                <td>{{ computer.id }}</td>
+                                <td><strong>{{ computer.name }}</strong></td>
+                                <td>{{ computer.brand }}</td>
+                                <td>{{ computer.type }}</td>
+                                <td>{{ computer.colour }}</td>
+                                <td><span class="badge badge-primary">{{ computer.lab.name }}</span></td>
+                                <td>
+                                    {% if computer.status == 'Active' %}
+                                        <span class="badge badge-success">Active</span>
+                                    {% elif computer.status == 'Maintenance' %}
+                                        <span class="badge badge-warning">Maintenance</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">{{ computer.status }}</span>
+                                    {% endif %}
+                                </td>
+                                {% if user.is_staff or user.is_superuser %}
+                                <td>
+                                    <a href="{% url 'edit_computer' computer.id %}" class="icon-btn icon-edit" data-bs-toggle="modal" data-bs-target="#editComputer{{ computer.id }}" title="Edit computer" aria-label="Edit computer"></a>
+                                    <form method="post" action="{% url 'delete_computer' computer.id %}" class="d-inline" onsubmit="return confirm('Delete this computer?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="icon-btn icon-delete" title="Delete computer" aria-label="Delete computer"></button>
+                                    </form>
+                                </td>
+                                {% endif %}
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="{% if user.is_staff or user.is_superuser %}8{% else %}7{% endif %}" class="text-center text-muted">No computers registered yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+{% if user.is_staff or user.is_superuser %}
+<!-- Edit pop-ups -->
+{% for computer in computers %}
+<div class="modal fade" id="editComputer{{ computer.id }}" tabindex="-1" aria-labelledby="editComputerLabel{{ computer.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <form method="post" action="{% url 'edit_computer' computer.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editComputerLabel{{ computer.id }}">Edit Computer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label for="name{{ computer.id }}">Computer Name</label>
+                        <input type="text" class="form-control" id="name{{ computer.id }}" name="name" value="{{ computer.name }}" required>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label for="brand{{ computer.id }}">Brand</label>
+                        <input type="text" class="form-control" id="brand{{ computer.id }}" name="brand" value="{{ computer.brand }}" required>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label for="type{{ computer.id }}">Type</label>
+                        <select class="form-select" id="type{{ computer.id }}" name="type" required>
+                            <option value="Desktop" {% if computer.type == 'Desktop' %}selected{% endif %}>Desktop</option>
+                            <option value="Laptop" {% if computer.type == 'Laptop' %}selected{% endif %}>Laptop</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label for="colour{{ computer.id }}">Colour</label>
+                        <input type="text" class="form-control" id="colour{{ computer.id }}" name="colour" value="{{ computer.colour }}" required>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label for="lab{{ computer.id }}">Lab</label>
+                        <select class="form-select" id="lab{{ computer.id }}" name="lab" required>
+                            {% for lab in labs %}
+                            <option value="{{ lab.id }}" {% if lab.id == computer.lab_id %}selected{% endif %}>{{ lab.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label for="status{{ computer.id }}">Status</label>
+                        <select class="form-select" id="status{{ computer.id }}" name="status" required>
+                            <option value="Active" {% if computer.status == 'Active' %}selected{% endif %}>Active</option>
+                            <option value="Maintenance" {% if computer.status == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+                            <option value="Disposed" {% if computer.status == 'Disposed' %}selected{% endif %}>Disposed</option>
+                        </select>
+                    </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Update Computer</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% endblock %}

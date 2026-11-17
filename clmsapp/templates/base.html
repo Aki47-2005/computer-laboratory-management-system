@@ -1,0 +1,341 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>{% block title %}Computer Lab Management System{% endblock %}</title>
+
+    <!-- Fonts and icons -->
+    <script src="{% static 'assets/js/plugin/webfont/webfont.min.js' %}"></script>
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["{% static 'assets/css/fonts.min.css' %}"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+
+    <!-- CSS: your old style.css FIRST so Kaiadmin can override it -->
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/plugins.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/kaiadmin.min.css' %}">
+
+    <!-- Compatibility: keeps your existing page content (buttons) looking as before
+         and stops the old style.css from breaking the sidebar -->
+    <style>
+        body { background-color: #f9fbfd; }
+        .sidebar p, .main-header p { font-family: inherit; font-size: inherit; }
+        .page-inner button[class="btn"] {
+            height: 30px; width: 250px; padding: 0;
+            background-color: royalblue; color: whitesmoke;
+            font-size: 14px; border: none; border-radius: 5px; cursor: pointer;
+        }
+        .page-inner button[class="btn"]:hover { background-color: navy; }
+        /* undo the old style.css .btn size (250px x 30px) for Kaiadmin buttons */
+        .btn { width: auto; height: auto; }
+
+        /* Edit / Delete icon buttons (flat Material-style icons) */
+        .icon-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 40px; height: 40px; padding: 0; margin-right: 4px;
+            border: 0; border-radius: 50%; background: transparent;
+            color: #6c757d; cursor: pointer; vertical-align: middle;
+            text-decoration: none; transition: background-color .2s, color .2s;
+        }
+        .icon-btn::before {
+            content: ""; display: block; width: 24px; height: 24px;
+            background-color: currentColor;
+            -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+            -webkit-mask-position: center; mask-position: center;
+            -webkit-mask-size: contain; mask-size: contain;
+        }
+        .icon-btn i { display: none; }
+        .icon-btn:hover { background-color: rgba(0, 0, 0, 0.06); }
+        .icon-edit:hover { color: #1572e8; }
+        .icon-delete:hover { color: #f25961; }
+        .icon-edit::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' d='M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h7M13 2v6h6M7 12h7M7 15h5'/%3E%3Cpath d='m14 18 5.8-5.8 2 2L16 20l-3 .8z'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' d='M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h7M13 2v6h6M7 12h7M7 15h5'/%3E%3Cpath d='m14 18 5.8-5.8 2 2L16 20l-3 .8z'/%3E%3C/svg%3E"); }
+        .icon-delete::before { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z'/%3E%3C/svg%3E"); }
+        .dropdown-user form .dropdown-item { background: none; border: 0; width: 100%; text-align: left; }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="wrapper">
+
+    {% if user.is_authenticated %}
+    {% with current=request.resolver_match.url_name %}
+    <!-- Sidebar -->
+    <div class="sidebar sidebar-style-2" data-background-color="dark">
+        <div class="sidebar-logo">
+            <div class="logo-header" data-background-color="dark">
+                <a href="{% if user.is_staff or user.is_superuser %}{% url 'index' %}{% else %}{% url 'user_dashboard' %}{% endif %}" class="logo">
+                    <span class="text-white fw-bold fs-4">CLMS</span>
+                </a>
+                <div class="nav-toggle">
+                    <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                    <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
+                </div>
+                <button class="topbar-toggler more"><i class="gg-more-vertical-alt"></i></button>
+            </div>
+        </div>
+
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+            <div class="sidebar-content">
+                <ul class="nav nav-secondary">
+
+                    {% if user.is_staff or user.is_superuser %}
+                    <li class="nav-item {% if current == 'index' %}active{% endif %}">
+                        <a href="{% url 'index' %}">
+                            <i class="fas fa-home"></i>
+                            <p>Admin Home</p>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <li class="nav-item {% if current == 'user_dashboard' %}active{% endif %}">
+                        <a href="{% url 'user_dashboard' %}">
+                            <i class="fas fa-columns"></i>
+                            <p>User Dashboard</p>
+                            <span class="badge badge-info ms-auto">Viewer</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-section">
+                        <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+                        <h4 class="text-section">Lab Resources</h4>
+                    </li>
+                    <li class="nav-item {% if current == 'labs' or current == 'edit_lab' %}active{% endif %}">
+                        <a href="{% url 'labs' %}">
+                            <i class="fas fa-building"></i>
+                            <p>{% if user.is_staff or user.is_superuser %}Labs{% else %}View Labs{% endif %}</p>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if current == 'computers' or current == 'edit_computer' %}active{% endif %}">
+                        <a href="{% url 'computers' %}">
+                            <i class="fas fa-desktop"></i>
+                            <p>{% if user.is_staff or user.is_superuser %}Computers{% else %}View Computers{% endif %}</p>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if current == 'specifications' or current == 'edit_specification' %}active{% endif %}">
+                        <a href="{% url 'specifications' %}">
+                            <i class="fas fa-microchip"></i>
+                            <p>{% if user.is_staff or user.is_superuser %}Specifications{% else %}View Specifications{% endif %}</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-section">
+                        <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+                        <h4 class="text-section">People &amp; Scheduling</h4>
+                    </li>
+                    <li class="nav-item {% if current == 'instructor' or current == 'edit_instructor' %}active{% endif %}">
+                        <a href="{% url 'instructor' %}">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            <p>{% if user.is_staff or user.is_superuser %}Instructors{% else %}View Instructors{% endif %}</p>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if current == 'schedules' or current == 'edit_schedule' %}active{% endif %}">
+                        <a href="{% url 'schedules' %}">
+                            <i class="fas fa-calendar-alt"></i>
+                            <p>{% if user.is_staff or user.is_superuser %}Schedules{% else %}View Schedules{% endif %}</p>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if current == 'attendants' or current == 'edit_attendant' %}active{% endif %}">
+                        <a href="{% url 'attendants' %}">
+                            <i class="fas fa-user-shield"></i>
+                            <p>{% if user.is_staff or user.is_superuser %}Attendants{% else %}View Attendants{% endif %}</p>
+                        </a>
+                    </li>
+
+                    {% if user.is_staff or user.is_superuser %}
+                    <li class="nav-section">
+                        <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+                        <h4 class="text-section">Operations</h4>
+                    </li>
+                    <li class="nav-item {% if current == 'maintenance' or current == 'edit_maintenance' %}active{% endif %}">
+                        <a href="{% url 'maintenance' %}">
+                            <i class="fas fa-wrench"></i>
+                            <p>Maintenance</p>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if current == 'disposals' or current == 'edit_disposal' %}active{% endif %}">
+                        <a href="{% url 'disposals' %}">
+                            <i class="fas fa-trash-alt"></i>
+                            <p>Disposals</p>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <li class="nav-section">
+                        <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+                        <h4 class="text-section">Account</h4>
+                    </li>
+                    <li class="nav-item">
+                        <a href="javascript:void(0);" style="cursor: default;">
+                            <i class="fas fa-user-circle"></i>
+                            <p>{{ user.username }}</p>
+                            {% if user.is_staff or user.is_superuser %}
+                            <span class="badge badge-primary">Admin</span>
+                            {% else %}
+                            <span class="badge badge-info">Viewer</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'logout' %}" class="px-3 mt-2">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm w-100">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </button>
+                        </form>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- End Sidebar -->
+    {% endwith %}
+    {% endif %}
+
+    <!-- Full width when logged out (no sidebar) -->
+    <div class="main-panel" {% if not user.is_authenticated %}style="width:100%"{% endif %}>
+
+        <div class="main-header">
+            {% if user.is_authenticated %}
+            <!-- Mobile logo header (needed so the sidebar toggle works on small screens) -->
+            <div class="main-header-logo">
+                <div class="logo-header" data-background-color="dark">
+                    <a href="{% if user.is_staff or user.is_superuser %}{% url 'index' %}{% else %}{% url 'user_dashboard' %}{% endif %}" class="logo">
+                        <span class="text-white fw-bold fs-4">CLMS</span>
+                    </a>
+                    <div class="nav-toggle">
+                        <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                        <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
+                    </div>
+                    <button class="topbar-toggler more"><i class="gg-more-vertical-alt"></i></button>
+                </div>
+            </div>
+            {% endif %}
+
+            <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+                <div class="container-fluid">
+                    <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                        {% if user.is_authenticated %}
+                        <li class="nav-item topbar-user dropdown hidden-caret">
+                            <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                                <div class="avatar-sm">
+                                    <span class="avatar-title rounded-circle border border-white bg-info">{{ user.username|slice:":1"|upper }}</span>
+                                </div>
+                                <span class="profile-username">
+                                    <span class="op-7">Hi,</span>
+                                    <span class="fw-bold">{{ user.username }}</span>
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-user animated fadeIn">
+                                <li>
+                                    <div class="user-box">
+                                        <div class="avatar-lg">
+                                            <span class="avatar-title rounded bg-info">{{ user.username|slice:":1"|upper }}</span>
+                                        </div>
+                                        <div class="u-text">
+                                            <h4>{{ user.username }}</h4>
+                                            {% if user.email %}<p class="text-muted">{{ user.email }}</p>{% endif %}
+                                            {% if user.is_staff or user.is_superuser %}
+                                            <span class="badge badge-primary">Administrator</span>
+                                            {% else %}
+                                            <span class="badge badge-info">Read-Only Viewer</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="{% url 'user_dashboard' %}">
+                                        <i class="fas fa-columns me-2"></i>User Dashboard
+                                    </a>
+                                </li>
+                                <li>
+                                    <div class="dropdown-divider"></div>
+                                    <form method="post" action="{% url 'logout' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                        {% else %}
+                        <li class="nav-item"><a class="nav-link fw-bold" href="{% url 'login' %}">Login</a></li>
+                        <li class="nav-item"><a class="nav-link fw-bold" href="{% url 'signup' %}">Sign Up</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </nav>
+        </div>
+
+        <div class="container">
+            <div class="page-inner">
+                <div class="pt-2 pb-4">
+                    <h3 class="fw-bold mb-3">{% block heading %}Computer Lab Management System{% endblock %}</h3>
+                </div>
+
+                {% block content %}
+                {% endblock %}
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container-fluid d-flex justify-content-center">
+                <div class="copyright">Computer Lab Management System &mdash; IUIU, Kampala Campus</div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- Core JS -->
+<script src="{% static 'assets/js/core/jquery-3.7.1.min.js' %}"></script>
+<script src="{% static 'assets/js/core/popper.min.js' %}"></script>
+<script src="{% static 'assets/js/core/bootstrap.min.js' %}"></script>
+<script src="{% static 'assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js' %}"></script>
+<script src="{% static 'assets/js/kaiadmin.min.js' %}"></script>
+
+<!-- Pop-up messages (success / error toasts) -->
+<script src="{% static 'assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js' %}"></script>
+{% if messages %}
+<script>
+    {% for message in messages %}
+    $.notify(
+        {
+            icon: 'fa fa-check-circle',
+            title: '{{ message.tags|title }}',
+            message: '{{ message|escapejs }}'
+        },
+        {
+            type: '{% if message.tags == "error" %}danger{% else %}{{ message.tags|default:"info" }}{% endif %}',
+            placement: { from: 'top', align: 'right' },
+            time: 1000,
+            delay: 4000
+        }
+    );
+    {% endfor %}
+</script>
+{% endif %}
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

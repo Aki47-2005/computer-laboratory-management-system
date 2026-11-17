@@ -1,0 +1,653 @@
+{% extends 'base.html' %}
+
+{% block title %}User Dashboard — Computer Lab Management System{% endblock %}
+
+{% block heading %}USER DASHBOARD{% endblock %}
+
+{% block content %}
+<!-- Welcome & Info Banner -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-round bg-primary-gradient text-white mb-4 shadow-sm">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div>
+                        <h2 class="text-white fw-bold mb-1">
+                            <i class="fas fa-desktop me-2"></i>Computer Lab Viewer Portal
+                        </h2>
+                        <p class="text-white-50 mb-0 fs-6">
+                            Welcome, <strong>{{ user.username }}</strong>! You have view-only access to lab availability, equipment specifications, timetables, and duty attendants.
+                        </p>
+                    </div>
+                    <div>
+                        <span class="badge bg-white text-primary px-3 py-2 fs-6 rounded-pill shadow-sm">
+                            <i class="fas fa-eye me-1"></i> Read-Only Mode
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notice Bar -->
+<div class="alert alert-info alert-dismissible fade show d-flex align-items-center mb-4" role="alert">
+    <i class="fas fa-info-circle me-3 fs-4 text-info"></i>
+    <div class="flex-grow-1">
+        <strong>Viewing Mode:</strong> You can browse and search all labs, computer equipment, schedules, and staff below. Creating, modifying, and deleting records are restricted to lab administrators.
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+<!-- Overview Stats Cards -->
+<div class="row">
+    <div class="col-sm-6 col-md-4 col-xl-2">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-icon">
+                        <div class="icon-big text-center icon-primary bubble-shadow-small">
+                            <i class="fas fa-building"></i>
+                        </div>
+                    </div>
+                    <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                            <p class="card-category">Labs</p>
+                            <h4 class="card-title">{{ total_labs }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4 col-xl-2">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-icon">
+                        <div class="icon-big text-center icon-info bubble-shadow-small">
+                            <i class="fas fa-desktop"></i>
+                        </div>
+                    </div>
+                    <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                            <p class="card-category">Computers</p>
+                            <h4 class="card-title">{{ total_computers }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4 col-xl-2">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-icon">
+                        <div class="icon-big text-center icon-success bubble-shadow-small">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                            <p class="card-category">Active PCs</p>
+                            <h4 class="card-title">{{ active_computers }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4 col-xl-2">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-icon">
+                        <div class="icon-big text-center icon-warning bubble-shadow-small">
+                            <i class="fas fa-wrench"></i>
+                        </div>
+                    </div>
+                    <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                            <p class="card-category">Maintenance</p>
+                            <h4 class="card-title">{{ maintenance_computers }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4 col-xl-2">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-icon">
+                        <div class="icon-big text-center icon-secondary bubble-shadow-small">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                    </div>
+                    <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                            <p class="card-category">Schedules</p>
+                            <h4 class="card-title">{{ total_schedules }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4 col-xl-2">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-icon">
+                        <div class="icon-big text-center icon-primary bubble-shadow-small">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                    </div>
+                    <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                            <p class="card-category">Attendants</p>
+                            <h4 class="card-title">{{ total_attendants }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Tabs Section -->
+<div class="card card-round">
+    <div class="card-header">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <ul class="nav nav-pills nav-secondary" id="userDashboardTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="schedules-tab" data-bs-toggle="pill" data-bs-target="#tab-schedules" href="#tab-schedules" role="tab" aria-controls="tab-schedules" aria-selected="true">
+                        <i class="fas fa-calendar-alt me-1"></i> Schedules Timetable
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="labs-tab" data-bs-toggle="pill" data-bs-target="#tab-labs" href="#tab-labs" role="tab" aria-controls="tab-labs" aria-selected="false">
+                        <i class="fas fa-building me-1"></i> Computer Labs
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="computers-tab" data-bs-toggle="pill" data-bs-target="#tab-computers" href="#tab-computers" role="tab" aria-controls="tab-computers" aria-selected="false">
+                        <i class="fas fa-desktop me-1"></i> Computers &amp; Specs
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="attendants-tab" data-bs-toggle="pill" data-bs-target="#tab-attendants" href="#tab-attendants" role="tab" aria-controls="tab-attendants" aria-selected="false">
+                        <i class="fas fa-user-shield me-1"></i> Lab Attendants
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="instructors-tab" data-bs-toggle="pill" data-bs-target="#tab-instructors" href="#tab-instructors" role="tab" aria-controls="tab-instructors" aria-selected="false">
+                        <i class="fas fa-chalkboard-teacher me-1"></i> Instructors
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="maintenance-tab" data-bs-toggle="pill" data-bs-target="#tab-maintenance" href="#tab-maintenance" role="tab" aria-controls="tab-maintenance" aria-selected="false">
+                        <i class="fas fa-tools me-1"></i> Service Notices
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="tab-content" id="userDashboardTabsContent">
+
+            <!-- TAB 1: SCHEDULES TIMETABLE -->
+            <div class="tab-pane fade show active" id="tab-schedules" role="tabpanel" aria-labelledby="schedules-tab">
+                <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+                    <div class="d-flex align-items-center gap-1 flex-wrap">
+                        <span class="fw-bold me-2 text-muted">Filter Day:</span>
+                        <button type="button" class="btn btn-sm btn-outline-primary day-filter active" data-day="ALL">All Days</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary day-filter" data-day="MON">Monday</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary day-filter" data-day="TUE">Tuesday</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary day-filter" data-day="WED">Wednesday</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary day-filter" data-day="THUR">Thursday</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary day-filter" data-day="FRI">Friday</button>
+                    </div>
+                    <div class="form-group p-0 m-0">
+                        <input type="text" id="scheduleSearchInput" class="form-control form-control-sm" placeholder="Search schedule...">
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-head-bg-primary align-middle" id="scheduleTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Lab</th>
+                                <th>Day</th>
+                                <th>Time Slot</th>
+                                <th>Instructor</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for schedule in schedules %}
+                            <tr data-day="{{ schedule.day }}">
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    <strong>{{ schedule.lab.name }}</strong>
+                                    <span class="d-block small text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ schedule.lab.location }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary px-2 py-1">{{ schedule.day }}</span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-primary">{{ schedule.start_time|time:"H:i" }} &ndash; {{ schedule.end_time|time:"H:i" }}</span>
+                                </td>
+                                <td>
+                                    <i class="fas fa-user text-muted me-1"></i>{{ schedule.instructor.full_name }}
+                                </td>
+                                <td>{{ schedule.instructor.department }}</td>
+                                <td>
+                                    <span class="badge badge-success"><i class="fas fa-clock me-1"></i>Scheduled</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="fas fa-calendar-times fs-2 d-block mb-2 text-muted"></i>
+                                    No lab schedules registered yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 2: COMPUTER LABS -->
+            <div class="tab-pane fade" id="tab-labs" role="tabpanel" aria-labelledby="labs-tab">
+                <div class="row g-3 mb-4">
+                    {% for item in labs_data %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card card-post card-round border h-100 shadow-none mb-0">
+                            <div class="card-header bg-light">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <h4 class="card-title text-primary fw-bold mb-0">
+                                        <i class="fas fa-building me-2"></i>{{ item.lab.name }}
+                                    </h4>
+                                    <span class="badge badge-primary">{{ item.active_pcs }}/{{ item.lab.capacity }} Active</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush mb-3">
+                                    <li class="list-group-item d-flex justify-content-between px-0">
+                                        <span class="text-muted"><i class="fas fa-map-marker-alt me-2 text-danger"></i>Location:</span>
+                                        <strong>{{ item.lab.location }}</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between px-0">
+                                        <span class="text-muted"><i class="fas fa-chair me-2 text-info"></i>Total Seating Capacity:</span>
+                                        <strong>{{ item.lab.capacity }} Seats</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between px-0">
+                                        <span class="text-muted"><i class="fas fa-hourglass-half me-2 text-warning"></i>Session Duration:</span>
+                                        <strong>{{ item.lab.duration }} Hours</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between px-0">
+                                        <span class="text-muted"><i class="fas fa-desktop me-2 text-success"></i>Registered Computers:</span>
+                                        <strong>{{ item.total_pcs }}</strong>
+                                    </li>
+                                </ul>
+                                <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                                    <span class="small text-muted">Lab Occupancy:</span>
+                                    <span class="badge bg-success text-white">{{ item.occupancy_pct }}% Capacity</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center text-muted py-4">
+                        <i class="fas fa-building fs-2 d-block mb-2 text-muted"></i>
+                        No computer labs found.
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Labs Detailed Table -->
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-head-bg-primary">
+                        <thead>
+                            <tr>
+                                <th>Lab ID</th>
+                                <th>Lab Name</th>
+                                <th>Campus Location</th>
+                                <th>Capacity (PCs)</th>
+                                <th>Session Duration</th>
+                                <th>Installed Computers</th>
+                                <th>Active Available</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in labs_data %}
+                            <tr>
+                                <td>{{ item.lab.id }}</td>
+                                <td><strong>{{ item.lab.name }}</strong></td>
+                                <td>{{ item.lab.location }}</td>
+                                <td>{{ item.lab.capacity }}</td>
+                                <td>{{ item.lab.duration }} hrs</td>
+                                <td>{{ item.total_pcs }}</td>
+                                <td>
+                                    <span class="badge badge-success">{{ item.active_pcs }}</span>
+                                    {% if item.maintenance_pcs > 0 %}
+                                    <span class="badge badge-warning ms-1">{{ item.maintenance_pcs }} in service</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="7" class="text-center text-muted">No labs registered.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 3: COMPUTERS & SPECIFICATIONS -->
+            <div class="tab-pane fade" id="tab-computers" role="tabpanel" aria-labelledby="computers-tab">
+                <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="fw-bold text-muted">Filter Status:</span>
+                        <button type="button" class="btn btn-sm btn-outline-secondary status-filter active" data-status="ALL">All</button>
+                        <button type="button" class="btn btn-sm btn-outline-success status-filter" data-status="Active">Active</button>
+                        <button type="button" class="btn btn-sm btn-outline-warning status-filter" data-status="Maintenance">Maintenance</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger status-filter" data-status="Disposed">Disposed</button>
+                    </div>
+                    <div class="form-group p-0 m-0">
+                        <input type="text" id="computerSearchInput" class="form-control form-control-sm" placeholder="Search by name, brand, lab, OS...">
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-head-bg-primary align-middle" id="computerTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>PC Name</th>
+                                <th>Lab</th>
+                                <th>Brand / Type</th>
+                                <th>Colour</th>
+                                <th>Status</th>
+                                <th>Processor</th>
+                                <th>RAM</th>
+                                <th>Storage</th>
+                                <th>Operating System</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for comp in computers %}
+                            <tr data-status="{{ comp.status }}">
+                                <td>{{ forloop.counter }}</td>
+                                <td><strong>{{ comp.name }}</strong></td>
+                                <td>
+                                    <span class="badge badge-primary">{{ comp.lab.name }}</span>
+                                </td>
+                                <td>{{ comp.brand }} &bull; {{ comp.type }}</td>
+                                <td>{{ comp.colour }}</td>
+                                <td>
+                                    {% if comp.status == 'Active' %}
+                                    <span class="badge badge-success"><i class="fas fa-check-circle me-1"></i>Active</span>
+                                    {% elif comp.status == 'Maintenance' %}
+                                    <span class="badge badge-warning"><i class="fas fa-wrench me-1"></i>Maintenance</span>
+                                    {% else %}
+                                    <span class="badge badge-danger">{{ comp.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if comp.spec %}
+                                    {{ comp.spec.processor }}
+                                    {% else %}
+                                    <span class="text-muted">&mdash;</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if comp.spec %}
+                                    {{ comp.spec.ram }} GB
+                                    {% else %}
+                                    <span class="text-muted">&mdash;</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if comp.spec %}
+                                    {{ comp.spec.storage }} GB
+                                    {% else %}
+                                    <span class="text-muted">&mdash;</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if comp.spec %}
+                                    <span class="badge bg-light text-dark border">{{ comp.spec.operating_system }}</span>
+                                    {% else %}
+                                    <span class="text-muted">&mdash;</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="10" class="text-center text-muted py-4">
+                                    <i class="fas fa-desktop fs-2 d-block mb-2 text-muted"></i>
+                                    No computers registered.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 4: LAB ATTENDANTS -->
+            <div class="tab-pane fade" id="tab-attendants" role="tabpanel" aria-labelledby="attendants-tab">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-head-bg-primary align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Attendant Full Name</th>
+                                <th>Assigned Lab</th>
+                                <th>Shift Schedule</th>
+                                <th>Contact Phone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attendant in attendants %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    <strong><i class="fas fa-user-shield me-2 text-primary"></i>{{ attendant.full_name }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge badge-info">{{ attendant.lab.name }}</span>
+                                    <span class="small text-muted d-block">{{ attendant.lab.location }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary px-2 py-1">{{ attendant.shift }}</span>
+                                </td>
+                                <td>
+                                    <a href="tel:{{ attendant.phone }}" class="text-decoration-none">
+                                        <i class="fas fa-phone-alt me-1 text-success"></i>{{ attendant.phone }}
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    <i class="fas fa-user-slash fs-2 d-block mb-2 text-muted"></i>
+                                    No attendants registered yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 5: INSTRUCTORS -->
+            <div class="tab-pane fade" id="tab-instructors" role="tabpanel" aria-labelledby="instructors-tab">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-head-bg-primary align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Instructor Full Name</th>
+                                <th>Department</th>
+                                <th>Phone Number</th>
+                                <th>Email Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for instructor in instructors %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    <strong><i class="fas fa-chalkboard-teacher me-2 text-info"></i>{{ instructor.full_name }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">{{ instructor.department }}</span>
+                                </td>
+                                <td>
+                                    <i class="fas fa-phone-alt me-1 text-success"></i>{{ instructor.phone }}
+                                </td>
+                                <td>
+                                    <a href="mailto:{{ instructor.email }}" class="text-decoration-none">
+                                        <i class="fas fa-envelope me-1 text-primary"></i>{{ instructor.email }}
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    <i class="fas fa-chalkboard fs-2 d-block mb-2 text-muted"></i>
+                                    No instructors registered yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 6: MAINTENANCE NOTICES -->
+            <div class="tab-pane fade" id="tab-maintenance" role="tabpanel" aria-labelledby="maintenance-tab">
+                <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
+                    <i class="fas fa-tools me-2 fs-5"></i>
+                    <div>
+                        <strong>Maintenance Status:</strong> Below are current and recent equipment maintenance activities. Computers undergoing service are temporarily offline.
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-head-bg-primary align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Computer</th>
+                                <th>Lab</th>
+                                <th>Item / Service Description</th>
+                                <th>Date Logged</th>
+                                <th>Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in maintenance_records %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><strong>{{ record.computer.name }}</strong> ({{ record.computer.brand }})</td>
+                                <td>{{ record.computer.lab.name }}</td>
+                                <td>
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-wrench me-1"></i>{{ record.item }}</span>
+                                </td>
+                                <td>{{ record.date|date:"M d, Y" }}</td>
+                                <td>{{ record.quantity }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="fas fa-check-circle fs-2 d-block mb-2 text-success"></i>
+                                    No current equipment maintenance issues. All registered systems are operational.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Schedule Day Filter
+        const dayButtons = document.querySelectorAll('.day-filter');
+        const scheduleRows = document.querySelectorAll('#scheduleTable tbody tr[data-day]');
+        const scheduleSearch = document.getElementById('scheduleSearchInput');
+
+        function filterSchedules() {
+            const activeDayBtn = document.querySelector('.day-filter.active');
+            const selectedDay = activeDayBtn ? activeDayBtn.getAttribute('data-day') : 'ALL';
+            const query = scheduleSearch ? scheduleSearch.value.trim().toLowerCase() : '';
+
+            scheduleRows.forEach(row => {
+                const rowDay = row.getAttribute('data-day');
+                const rowText = row.textContent.toLowerCase();
+                const matchDay = (selectedDay === 'ALL' || rowDay === selectedDay);
+                const matchQuery = (query === '' || rowText.includes(query));
+
+                row.style.display = (matchDay && matchQuery) ? '' : 'none';
+            });
+        }
+
+        dayButtons.forEach(btn => {
+            btn.addEventListener('click', function () {
+                dayButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                filterSchedules();
+            });
+        });
+
+        if (scheduleSearch) {
+            scheduleSearch.addEventListener('input', filterSchedules);
+        }
+
+        // Computer Status & Text Filter
+        const statusButtons = document.querySelectorAll('.status-filter');
+        const computerRows = document.querySelectorAll('#computerTable tbody tr[data-status]');
+        const computerSearch = document.getElementById('computerSearchInput');
+
+        function filterComputers() {
+            const activeStatusBtn = document.querySelector('.status-filter.active');
+            const selectedStatus = activeStatusBtn ? activeStatusBtn.getAttribute('data-status') : 'ALL';
+            const query = computerSearch ? computerSearch.value.trim().toLowerCase() : '';
+
+            computerRows.forEach(row => {
+                const rowStatus = row.getAttribute('data-status');
+                const rowText = row.textContent.toLowerCase();
+                const matchStatus = (selectedStatus === 'ALL' || rowStatus === selectedStatus);
+                const matchQuery = (query === '' || rowText.includes(query));
+
+                row.style.display = (matchStatus && matchQuery) ? '' : 'none';
+            });
+        }
+
+        statusButtons.forEach(btn => {
+            btn.addEventListener('click', function () {
+                statusButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                filterComputers();
+            });
+        });
+
+        if (computerSearch) {
+            computerSearch.addEventListener('input', filterComputers);
+        }
+    });
+</script>
+{% endblock %}

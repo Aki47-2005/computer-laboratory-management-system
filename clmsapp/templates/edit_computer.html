@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Computer — Computer Lab Management System{% endblock %}
+
+{% block heading %}EDIT COMPUTER{% endblock %}
+
+{% block content %}
+               <form method="post">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-header"><div class="card-title">Edit Computer</div></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label for="name">Computer Name</label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ computer.name }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="brand">Brand</label>
+                            <input type="text" class="form-control" id="brand" name="brand" value="{{ computer.brand }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="type">Type</label>
+                            <select class="form-select" id="type" name="type" required>
+                                <option value="Desktop" {% if computer.type == 'Desktop' %}selected{% endif %}>Desktop</option>
+                                <option value="Laptop" {% if computer.type == 'Laptop' %}selected{% endif %}>Laptop</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="colour">Colour</label>
+                            <input type="text" class="form-control" id="colour" name="colour" value="{{ computer.colour }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="lab">Lab</label>
+                            <select class="form-select" id="lab" name="lab" required>
+                                {% for lab in labs %}
+                                <option value="{{ lab.id }}" {% if lab.id == computer.lab_id %}selected{% endif %}>{{ lab.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="status">Status</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="Active" {% if computer.status == 'Active' %}selected{% endif %}>Active</option>
+                                <option value="Maintenance" {% if computer.status == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+                                <option value="Disposed" {% if computer.status == 'Disposed' %}selected{% endif %}>Disposed</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <button type="submit" class="btn btn-success">Update Computer</button>
+                    <a href="{% url 'computers' %}" class="btn btn-danger">Cancel</a>
+                </div>
+            </div>
+        </form>
+{% endblock %}

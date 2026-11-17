@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Login — Computer Lab Management System{% endblock %}
+
+{% block heading %}<span class="d-block text-center">Computer Lab Management System</span>{% endblock %}
+
+{% block content %}
+    <h2 id="login-page">Login Portal</h2>
+    <p id="intro-paragraph">Please enter your username and password to log in to the Computer Lab Management System.</p>
+
+    {% if error %}
+    <p style="color: red; text-align: center;">{{ error }}</p>
+    {% endif %}
+
+    <form class="centered-form" method="post">
+        {% csrf_token %}
+        <p><input type="text" class="input-control" name="username" placeholder="Enter Username" required></p>
+        <p><input type="password" class="input-control" name="password" placeholder="Enter Password" required></p>
+        <p><button type="submit" class="btn">Login</button></p>
+    </form>
+
+    <p id="intro-paragraph"><a href="{% url 'signup' %}">No account yet? Sign up</a></p>
+{% endblock %}

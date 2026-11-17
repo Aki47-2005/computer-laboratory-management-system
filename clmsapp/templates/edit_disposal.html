@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Disposal — Computer Lab Management System{% endblock %}
+
+{% block heading %}EDIT DISPOSAL{% endblock %}
+
+{% block content %}
+                <form method="post">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-header"><div class="card-title">Edit Disposal</div></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label for="computer">Computer</label>
+                            <select class="form-select" id="computer" name="computer" required>
+                                {% for computer in computers %}
+                                <option value="{{ computer.id }}" {% if computer.id == disposal.computer_id %}selected{% endif %}>{{ computer.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="date">Date</label>
+                            <input type="date" class="form-control" id="date" name="date" value="{{ disposal.date|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="reason">Reason</label>
+                            <select class="form-select" id="reason" name="reason" required>
+                                <option value="Obsolete" {% if disposal.reason == 'Obsolete' %}selected{% endif %}>Obsolete</option>
+                                <option value="Beyond repair" {% if disposal.reason == 'Beyond repair' %}selected{% endif %}>Beyond repair</option>
+                                <option value="Damaged" {% if disposal.reason == 'Damaged' %}selected{% endif %}>Damaged</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="method">Method</label>
+                            <select class="form-select" id="method" name="method" required>
+                                <option value="Recycled" {% if disposal.method == 'Recycled' %}selected{% endif %}>Recycled</option>
+                                <option value="Sold" {% if disposal.method == 'Sold' %}selected{% endif %}>Sold</option>
+                                <option value="Donated" {% if disposal.method == 'Donated' %}selected{% endif %}>Donated</option>
+                                <option value="Scrapped" {% if disposal.method == 'Scrapped' %}selected{% endif %}>Scrapped</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <button type="submit" class="btn btn-success">Update Disposal</button>
+                    <a href="{% url 'disposals' %}" class="btn btn-danger">Cancel</a>
+                </div>
+            </div>
+        </form>
+{% endblock %}

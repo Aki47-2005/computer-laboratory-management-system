@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Instructor — Computer Lab Management System{% endblock %}
+
+{% block heading %}EDIT INSTRUCTOR{% endblock %}
+
+{% block content %}
+               <form method="post">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-header"><div class="card-title">Edit Instructor</div></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label for="full_name">Full Name</label>
+                            <input type="text" class="form-control" id="full_name" name="full_name" value="{{ instructor.full_name }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="text" class="form-control" id="phone" name="phone" value="{{ instructor.phone }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ instructor.email }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="department">Department</label>
+                            <input type="text" class="form-control" id="department" name="department" value="{{ instructor.department }}" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <button type="submit" class="btn btn-success">Update Instructor</button>
+                    <a href="{% url 'instructor' %}" class="btn btn-danger">Cancel</a>
+                </div>
+            </div>
+        </form>
+{% endblock %}

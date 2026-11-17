@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up — Computer Lab Management System{% endblock %}
+
+{% block heading %}<span class="d-block text-center">Computer Lab Management System</span>{% endblock %}
+
+{% block content %}
+    <h2 id="login-page">Create Account</h2>
+    <p id="intro-paragraph">Fill in the form below to create your account.</p>
+
+    <form class="centered-form" method="post">
+        {% csrf_token %}
+
+        {% for error in form.non_field_errors %}
+        <p class="field-error">{{ error }}</p>
+        {% endfor %}
+
+        {% for field in form %}
+        <div class="form-row">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+            <small>{{ field.help_text|safe }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+            <span class="field-error">{{ error }}</span>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+        <p><button type="submit" class="btn">Sign Up</button></p>
+    </form>
+
+    <p id="intro-paragraph"><a href="{% url 'login' %}">Already have an account? Login</a></p>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Attendant — Computer Lab Management System{% endblock %}
+
+{% block heading %}EDIT ATTENDANT{% endblock %}
+
+{% block content %}
+                <form method="post">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-header"><div class="card-title">Edit Attendant</div></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label for="full_name">Full Name</label>
+                            <input type="text" class="form-control" id="full_name" name="full_name" value="{{ attendant.full_name }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="text" class="form-control" id="phone" name="phone" value="{{ attendant.phone }}" required>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="lab">Assigned Lab</label>
+                            <select class="form-select" id="lab" name="lab" required>
+                                {% for lab in labs %}
+                                <option value="{{ lab.id }}" {% if lab.id == attendant.lab_id %}selected{% endif %}>{{ lab.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="shift">Shift</label>
+                            <select class="form-select" id="shift" name="shift" required>
+                                <option value="Day" {% if attendant.shift == 'Day' %}selected{% endif %}>Day</option>
+                                <option value="Evening" {% if attendant.shift == 'Evening' %}selected{% endif %}>Evening</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <button type="submit" class="btn btn-success">Update Attendant</button>
+                    <a href="{% url 'attendants' %}" class="btn btn-danger">Cancel</a>
+                </div>
+            </div>
+        </form>
+{% endblock %}
